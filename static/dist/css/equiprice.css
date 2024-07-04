@@ -1,0 +1,11 @@
+.scroll-container {
+    width: 100%; 
+    overflow-x: auto;
+    white-space: nowrap; 
+}
+
+.scroll-container img {
+    display: inline-block;
+    margin-right: 10px; 
+    width: 15%;
+}
