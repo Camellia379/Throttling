@@ -3,7 +3,7 @@ let defaultInfo = {
     phn: "000-0000-0000",   //消费者电话
     id: "000000000000000000",    //消费者身份证号码
     ocur_time: "2024-01-01T00:00:00",     //发生日期
-    gri_type: "default",     //申诉类型
+    gri_type: "消费者权益保护",     //申诉类型
     description: "null",     //描述
     evi: "null",     //证据
     relate_company: "null",      //涉及企业、组织s

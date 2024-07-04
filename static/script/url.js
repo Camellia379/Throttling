@@ -33,7 +33,6 @@ function urlSubmit() {
     document.getElementById('platformChose').value = null;
     document.getElementById('urlInput').value = null;
 
-    // 改
     fetch('http://127.0.0.1:3000', {
         method: 'POST',
         headers: {
@@ -41,12 +40,15 @@ function urlSubmit() {
         },
         body: JSON.stringify(url_post)
     })
-        .then(response => response.json())
+        .then(response => response.text())
         .then(backdata => {
-            console.log(backdata);
+            let data = JSON.parse(backdata);
+            console.log(data);
             let imgctr = document.getElementById('image-ctr');
 
-            imgctr.innerHTML = `<img class="img-thumbnail" src="data:image/png;base64, ${backdata.img}">`;
+            data.img.forEach(function (str) {
+                imgctr.innerHTML += `<img class="img-thumbnail" src="data:image/png;base64, ${str}">`
+            });
 
 
             // 信息表格
@@ -81,44 +83,54 @@ function urlSubmit() {
                                 ` + euser_info + `</tbody>    </table>`;
 
 
-            // 历史信息表格
-            euser_his = ``;
-            for (let i = 0; i < data.sex.length; ++i) {
-                let type = "";
-                if (i % 2 === 1) {
-                    type = "bg bg-primary";
-                } else type = "";
-                euser_his +=
-                    `                 
-                    <tr class="${type}">
-                    <th scope="row">${i+1}</th>
-                    <td>${data.platform[i]}</td>
-                    <td>${data.detect_time[i]}</td>
-                    <td>${data.info[i]}</td>
-                    <td>${data.max_price[i]}</td>
-                    <td>${data.min_price[i]}</td>
-                    <td>${data.percent[i]}</td>
-                </tr>
-                `;
-            }
+            // 发送请求到第二个服务器，获取历史信息
+            fetch('http://127.0.0.1:5000/url_receive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(url_post)
+            })
+                .then(response => response.json())
+                .then(history_data => {
+                    console.log(history_data);
 
-            hisctr = document.getElementById('ctr-table-history');
-            hisctr.innerHTML += `<table class="table table-dark mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">平台</th>
-                    <th scope="col">检测时间</th>
-                    <th scope="col">商品信息</th>
-                    <th scope="col">最高价格</th>
-                    <th scope="col">最低价格</th>
-                    <th scope="col">高于平均价格率</th>
-                </tr>
-            </thead>
-            <tbody>` + euser_his + `
-            </tbody>
-        </table>`
-        })
+                    // 渲染历史信息表格
+                    let hisctr = document.getElementById('ctr-table-history');
+                    let euser_his = '';
+                    for (let i = 0; i < history_data.sex.length; ++i) {
+                        let type = (i % 2 === 1) ? "bg bg-primary" : "";
+                        euser_his +=
+                            `<tr class="${type}">
+                                <th scope="row">${i + 1}</th>
+                                <td>${history_data.platform[i]}</td>
+                                <td>${history_data.detect_time[i]}</td>
+                                <td>${history_data.info[i]}</td>
+                                <td>${history_data.max_price[i]}</td>
+                                <td>${history_data.min_price[i]}</td>
+                                <td>${history_data.percent[i]}</td>
+                            </tr>`;
+                    }
+
+                    hisctr.innerHTML = `
+                        <table class="table table-dark mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">平台</th>
+                                    <th scope="col">检测时间</th>
+                                    <th scope="col">商品信息</th>
+                                    <th scope="col">最高价格</th>
+                                    <th scope="col">最低价格</th>
+                                    <th scope="col">高于平均价格率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${euser_his}
+                            </tbody>
+                        </table>`;
+                })
+        });
 }
 
 //初始化数据请求
