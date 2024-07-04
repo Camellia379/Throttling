@@ -23,6 +23,7 @@ function init_urlInfo() {
 }
 
 //url提交
+// url提交
 function urlSubmit() {
     let url_post = {
         url: chosen_url,
@@ -33,12 +34,12 @@ function urlSubmit() {
     document.getElementById('platformChose').value = null;
     document.getElementById('urlInput').value = null;
 
-    fetch('http://127.0.0.1:3000', {
-        method: 'POST',
+    fetch('http://121.37.39.202:8087/test/getValue3', {
+        method: 'get',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(url_post)
+        // body: JSON.stringify(url_post)
     })
         .then(response => response.text())
         .then(backdata => {
@@ -46,51 +47,64 @@ function urlSubmit() {
             console.log(data);
             let imgctr = document.getElementById('image-ctr');
 
-            data.img.forEach(function (str) {
-                imgctr.innerHTML += `<img class="img-thumbnail" src="data:image/png;base64, ${str}">`
-            });
+            // 提取 base64 图片
+            let base64Image = data.data.base64[0];
 
+            // 发送 base64 图片到后端进行切割
+            fetch('http://127.0.0.1:5000/cut_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ base64_img: base64Image })
+            })
+                .then(response => response.json())
+                .then(cutImages => {
+                    cutImages.forEach(function (base64Str) {
+                        imgctr.innerHTML += `<img class="img-thumbnail" src="data:image/png;base64, ${base64Str}">`;
+                    });
+                });
 
             // 信息表格
-            infoctr = document.getElementById('ctr-table-info');
-            euser_info = ``;
-            for (let i = 0; i < data.sex.length; ++i) {
-                let type = "";
-                if (i % 2 === 1) {
-                    type = "bg bg-primary";
-                } else type = "";
-                euser_info +=
-                    ` <tr class="${type}">
-                <td>${i + 1}</td>
-                <td>${data.sex[i]}</td>
-                <td>${data.level[i]}</td>
-                <td>${data.item_cnt[i]}</td>
-                <td>${data.price[i]}</td> </tr>
+            let infoctr = document.getElementById('ctr-table-info');
+            let euser_info = '';
+            for (let i = 0; i < data.data.sex.length; ++i) {
+                let type = (i % 2 === 1) ? "bg bg-primary" : "";
+                euser_info += `
+                    <tr class="${type}">
+                        <td>${i + 1}</td>
+                        <td>${data.data.sex[i]}</td>
+                        <td>${data.data.level[i]}</td>
+                        <td>${data.data.item_cnt[i]}</td>
+                        <td>${data.data.priceList[i]}</td>
+                    </tr>
                 `;
             }
 
-            infoctr.innerHTML += `                            
-                            <table class="table table-dark mb-0">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">用户性别</th>
-                                        <th scope="col">用户等级</th>
-                                        <th scope="col">优惠项数</th>
-                                        <th scope="col">商品价格</th>
-                                    </tr>
-                                </thead> <tbody> 
-                                ` + euser_info + `</tbody>    </table>`;
+            infoctr.innerHTML += `                             
+                <table class="table table-dark mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">用户性别</th>
+                            <th scope="col">用户等级</th>
+                            <th scope="col">优惠项数</th>
+                            <th scope="col">商品价格</th>
+                        </tr>
+                    </thead>
+                    <tbody>${euser_info}</tbody>
+                </table>
+            `;
 
             // 价格分析
             let pricectr = document.getElementById('ctr-price');
-            let euser_price = '';
             pricectr.innerHTML = `
-            <div>
-                <p>最高价格: ${data.max_price}元</p>
-                <p>最低价格: ${data.min_price}元</p>
-                <p>平均价格: ${data.avg_price}元</p>
-            </div>`;
+                <div>
+                    <p>最高价格: ${data.data.max}元</p>
+                    <p>最低价格: ${data.data.min}元</p>
+                    <p>平均价格: ${data.data.avg}元</p>
+                </div>
+            `;
 
             // 发送请求到第二个服务器，获取历史信息
             fetch('http://127.0.0.1:5000/url_receive', {
@@ -109,8 +123,8 @@ function urlSubmit() {
                     let euser_his = '';
                     for (let i = 0; i < history_data.sex.length; ++i) {
                         let type = (i % 2 === 1) ? "bg bg-primary" : "";
-                        euser_his +=
-                            `<tr class="${type}">
+                        euser_his += `
+                            <tr class="${type}">
                                 <th scope="row">${i + 1}</th>
                                 <td>${history_data.platform[i]}</td>
                                 <td>${history_data.detect_time[i]}</td>
@@ -118,7 +132,8 @@ function urlSubmit() {
                                 <td>${history_data.max_price[i]}</td>
                                 <td>${history_data.min_price[i]}</td>
                                 <td>${history_data.percent[i]}</td>
-                            </tr>`;
+                            </tr>
+                        `;
                     }
 
                     hisctr.innerHTML = `
@@ -134,10 +149,9 @@ function urlSubmit() {
                                     <th scope="col">高于平均价格率</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${euser_his}
-                            </tbody>
-                        </table>`;
+                            <tbody>${euser_his}</tbody>
+                        </table>
+                    `;
                 })
         });
 }
@@ -150,18 +164,8 @@ function init_data_post() {
             'Content-Type': 'application/json'
         }
     })
-        .then(response => response.text())
-        .then(backdata => {
-            let data = JSON.parse(backdata);
+        .then(response => response.json())
+        .then(data => {
             console.log(data);
-            let choseList = document.getElementById('platformChose');
-
-            //将平台名称设置到选择栏
-            data.platform_list.forEach(function (item, index) {
-                var optionElement = document.createElement("option");
-                optionElement.value = index;
-                optionElement.textContent = item;
-                choseList.appendChild(optionElement);
-            });
         });
 }

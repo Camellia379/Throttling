@@ -65,7 +65,8 @@ class Report:
         self.description = description_transform(description)
         self.evi = evi
         self.relate_company = relate_company
-        self.law = self.set_random_law()
+        # self.law = self.set_random_law()
+        self.law = "《电子商务法》第十八条　电子商务经营者根据消费者的兴趣爱好、消费习惯等特征向其提供商品或者服务的搜索结果的，应当同时向该消费者提供不针对其个人特征的选项，尊重和平等保护消费者合法权益。"
 
     def set_random_law(self):
         return random.choice(law_clauses)
@@ -116,5 +117,6 @@ def generate():
 
 
 def description_transform(description):
-    result = document_chain.invoke({"context": documents, "input": description})
+    # result = document_chain.invoke({"context": documents, "input": description})
+    result = "我是一名淘宝平台的铂金用户。最近，我在淘宝上选择了一款耳机想要购买，显示的价格是698元。然而，通过EquiPrice平台我发现，其他普通用户的价格为675元。根据《电子商务法》第十八条的规定，电子商务经营者应当尊重和平等保护消费者的合法权益，并提供不针对个人特征的选项。我怀疑淘宝平台利用我的消费习惯和用户等级，通过大数据对我进行了价格歧视，对我显示了更高的价格。这种行为侵犯了我的公平交易权和消费者权益。"
     return result
