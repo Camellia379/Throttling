@@ -82,6 +82,15 @@ function urlSubmit() {
                                 </thead> <tbody> 
                                 ` + euser_info + `</tbody>    </table>`;
 
+            // 价格分析
+            let pricectr = document.getElementById('ctr-price');
+            let euser_price = '';
+            pricectr.innerHTML = `
+            <div>
+                <p>最高价格: ${data.max_price}元</p>
+                <p>最低价格: ${data.min_price}元</p>
+                <p>平均价格: ${data.avg_price}元</p>
+            </div>`;
 
             // 发送请求到第二个服务器，获取历史信息
             fetch('http://127.0.0.1:5000/url_receive', {
