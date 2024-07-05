@@ -1,9 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 import base64
 import io
 from PIL import Image
 
-app = Flask(__name__)
+cut_img = Blueprint('cut_img', __name__)
 
 class Coord:
     def __init__(self, sx, ex, sy, ey):
@@ -33,10 +33,10 @@ def cut_image(img, coords):
         cut_images.append(convert_image_to_base64(cropped_img, 'PNG'))
     return cut_images
 
-@app.route('/cut_image', methods=['POST'])
+@cut_img.route('/cut_image', methods=['POST'])
 def cut_image_route():
     data = request.get_json()
-    base64_img = data.get('base64_img')
+    base64_img = data.get('base64Image')  # 提取键名为 base64Image 的数据
 
     area = [
         Coord(200, 431, 46, 514),
@@ -61,4 +61,4 @@ def cut_image_route():
     return jsonify(cut_images_base64)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    cut_img.run(debug=True)

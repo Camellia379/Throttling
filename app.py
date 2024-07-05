@@ -5,6 +5,7 @@ from EquiPriceUtils.detectUtils import URLProcessor
 from EquiPriceUtils.euser_data_manage import euser_data
 from EquiPriceUtils.generate_processor import generateProcessor
 from EquiPriceUtils.homepageUtils import HomeProcessor
+from EquiPriceUtils.cut_image import cut_img
 from EquiPriceUtils.CONST import *
 from EquiPriceUtils.page_manage import *
 
@@ -20,6 +21,8 @@ app.register_blueprint(pageCtr)
 app.register_blueprint(HomeProcessor)
 # 注册：URL处理
 app.register_blueprint(URLProcessor)
+# 注册：图片裁剪
+app.register_blueprint(cut_img)
 # 注册：报告生成
 app.register_blueprint(generateProcessor)
 # 注册：仿真用户

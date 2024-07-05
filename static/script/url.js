@@ -56,7 +56,7 @@ function urlSubmit() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ base64_img: base64Image })
+                body: JSON.stringify({ base64Image })
             })
                 .then(response => response.json())
                 .then(cutImages => {
